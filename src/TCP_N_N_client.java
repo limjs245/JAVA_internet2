@@ -8,9 +8,14 @@ import java.net.Socket;
 import java.util.Enumeration;
 import java.util.Scanner;
 
+// 메인 class
 public class TCP_N_N_client {
+    // main 함수
+    // 실행 시 port scanning 진행
+    // send와 receive를 별도의 스레드로 분리
     public static void main(String[] args) {
         try {
+            // port scanning
             Socket socket = TCP_PortScanning_2.portScanning();
             System.out.println("===== Connected to server =====");
 
@@ -29,6 +34,8 @@ public class TCP_N_N_client {
     }
 }
 
+// send class
+// thread
 class Send implements Runnable {
     Socket socket;
     PrintWriter out;
@@ -40,6 +47,8 @@ class Send implements Runnable {
         this.sc = new Scanner(System.in);
     }
 
+    // 입력 받기 루프
+    // '/exit' 입력 시 socket 종료
     @Override
     public void run() {
         String input;
@@ -66,13 +75,19 @@ class Send implements Runnable {
     }
 }
 
+// receive class
+// thread
 class Receive implements Runnable {
+    Socket socket;
     BufferedReader in;
 
     public Receive(Socket socket) throws Exception {
+        this.socket = socket;
         this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
+    // 메시지 받기 루프
+    // 메시지가 null이면 socket 종료 시도 후 코드 종료
     @Override
     public void run() {
         String message;
@@ -82,23 +97,45 @@ class Receive implements Runnable {
                 message = in.readLine();
                 if (message == null) {
                     System.out.println("===== server closed =====");
+                    try {
+                        socket.close();
+                    }  catch (Exception e1) {
+                        System.out.println(">>> error: " + e1.getMessage());
+                        break;
+                    }
+                    System.exit(0);
                     break;
                 }
                 System.out.println(message);
             } catch (Exception e) {
                 System.out.println(">>> error: " + e.getMessage());
+                try {
+                    socket.close();
+                }  catch (Exception e1) {
+                    System.out.println(">>> error: " + e1.getMessage());
+                    break;
+                }
                 break;
             }
         }
     }
 }
 
+// port scanning:
+// 같은 wifi 내에서 열린 port를 찾아서 연결하는 기능
+// -> 모든 host id를 탐색
+// -> 각 탐색 시간은 200ms
+// 1. 실행 시 getLocalIp 함수를 호출하여 ip 주소를 얻음
+// 2. ip 주소에서 network id를 추출
+// 3. 일일이 host id를 대입해서 열린 port를 탐색
+// 4. 열린 port가 없으면 종료
+// host id에서 0과 255는 다른 용도이므로 제외
 class TCP_PortScanning_2 {
     final static int PORT = 51235;
     final static int maxHostId = 254;
     static String fullIp = getLocalIp();
     static String networkId = fullIp.substring(0, fullIp.lastIndexOf('.') + 1);
-    final static int timeout = 100;
+    final static int timeout = 200;
 
     public static Socket portScanning() throws Exception {
         System.out.println(">> Network Id: " + networkId);
@@ -119,13 +156,14 @@ class TCP_PortScanning_2 {
             }
         }
 
-        if (failCount == 256) {
+        if (failCount == maxHostId) {
             System.out.println(">> There is no open communication.");
             return null;
         }
         return null;
     }
 
+    // ip 주소를 얻는 함수
     public static String getLocalIp() {
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();

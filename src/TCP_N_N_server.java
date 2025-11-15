@@ -9,7 +9,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 // 메인 class
 public class TCP_N_N_server {
     public static boolean isRunning = true;
-
     // main 함수
     public static void main(String[] args) {
         // port: 51235
@@ -42,8 +41,9 @@ public class TCP_N_N_server {
 }
 
 // client 관리 class
-// 스레드가 아님
-// 스레드 공유 리스트가 두개: clientHandlers 리스트, 유저 닉네임 리스트
+// thread가 아님
+// thread 공유 리스트가 두개: clientHandlers 리스트, 유저 닉네임 리스트(Set)
+// synchronized 키워드 관련은 배우지 않아서 AI 도움을 받음
 class ClientManagement {
     private final List<ClientHandler> clientHandlers = new CopyOnWriteArrayList<>();
     private final Set<String> userNicknameList = new HashSet<>();
@@ -51,13 +51,14 @@ class ClientManagement {
 
     public ClientManagement() {}
 
+    // synchronized 키워드로 안전하게 clientHandler, nickname 추가
+    // null이나 공백, 스페이스면 false 반환
+    // 중복이어도 false 반환
     public boolean tryAddUser(ClientHandler clientHandler, String nickname) {
         if (nickname == null || nickname.trim().isEmpty()) {
             return false;
         }
-
         String trimmedNickname = nickname.trim();
-
         synchronized (nicknameLock) {
             if (userNicknameList.contains(trimmedNickname)) {
                 return false;
@@ -68,13 +69,14 @@ class ClientManagement {
         return true;
     }
 
+    // synchronized 키워드로 안전하게 리스트 받기
     public List<String> getUserNicknameList() {
         synchronized (nicknameLock) {
             return new ArrayList<>(userNicknameList);
         }
     }
 
-    // clientHandler와 해당 유저 닉네임 모두 삭제
+    // synchronized 키워드로 안전하게 clientHandler와 해당 유저 닉네임 모두 삭제
     public void removeClient(ClientHandler clientHandler) {
         clientHandlers.remove(clientHandler);
         String nickname = clientHandler.nickname;
@@ -108,6 +110,7 @@ class ClientManagement {
 }
 
 // client 관리 class
+// thread
 // client가 server에 접속 시 새 스레드로 생성해 관리
 class ClientHandler implements Runnable {
     private final Socket socket;
@@ -184,8 +187,7 @@ class ClientHandler implements Runnable {
     }
 
     // run 함수
-    // 처음 접속 시 닉네임 입력이 뜸
-    // 닉네임은 null, 공백 또는 스페이스, 같은 닉네임이 있을 시 다시 입력하게 됨
+    // 접속 시 clientManagement class의 tryAddUser 메소드 호출
     // 닉네임 입력 후 접속 메시지가 전 유저에게 전송
     @Override
     public void run() {
@@ -216,7 +218,7 @@ class ClientHandler implements Runnable {
 }
 
 // 서버 진행 중지를 위한 Running class
-// 스레드로 작동
+// thread로 작동
 // '/exit' 입력 시 서버 종료
 class Running implements Runnable {
     Scanner scanner;
