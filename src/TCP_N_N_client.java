@@ -12,7 +12,7 @@ public class TCP_N_N_client {
     public static void main(String[] args) {
         try {
             Socket socket = TCP_PortScanning_2.portScanning();
-            System.out.println("Connected to server");
+            System.out.println("===== Connected to server =====");
 
             if (socket != null && socket.isConnected()) {
                 Send send = new Send(socket);
@@ -24,7 +24,7 @@ public class TCP_N_N_client {
                 sendThread.join();
             }
         } catch (Exception e) {
-            System.out.println("error" + e.getMessage());
+            System.out.println(">>> error" + e.getMessage());
         }
     }
 }
@@ -48,18 +48,18 @@ class Send implements Runnable {
             try {
                 input = sc.nextLine();
                 out.println(input);
-                if (input.equals("exit")) {
+                if (input.equals("/exit")) {
                     sc.close();
                     try {
                         socket.close();
-                        System.out.println("Socket closed");
+                        System.out.println("===== Socket closed =====");
                     }  catch (Exception e) {
-                        System.out.println("error: " + e.getMessage());
+                        System.out.println(">>> error: " + e.getMessage());
                     }
                     break;
                 }
             } catch (Exception e) {
-                System.out.println("error: " + e.getMessage());
+                System.out.println(">>> error: " + e.getMessage());
                 break;
             }
         }
@@ -81,12 +81,12 @@ class Receive implements Runnable {
             try {
                 message = in.readLine();
                 if (message == null) {
-                    System.out.println("server closed");
+                    System.out.println("===== server closed =====");
                     break;
                 }
                 System.out.println(message);
             } catch (Exception e) {
-                System.out.println("error: " + e.getMessage());
+                System.out.println(">>> error: " + e.getMessage());
                 break;
             }
         }
@@ -101,14 +101,14 @@ class TCP_PortScanning_2 {
     final static int timeout = 100;
 
     public static Socket portScanning() throws Exception {
-        System.out.println("Network Id: " + networkId);
+        System.out.println(">> Network Id: " + networkId);
 
         int i;
         int failCount = 0;
 
         for(i = 1; i <= maxHostId; i++) {
             Socket tempSocket = new Socket();
-            System.out.println("trying to connect to " + networkId + i);
+            System.out.println(">> trying to connect to " + networkId + i);
 
             try {
                 tempSocket.connect(new InetSocketAddress(networkId + i, PORT), timeout);
@@ -120,7 +120,7 @@ class TCP_PortScanning_2 {
         }
 
         if (failCount == 256) {
-            System.out.println("There is no open communication.");
+            System.out.println(">> There is no open communication.");
             return null;
         }
         return null;
@@ -143,8 +143,8 @@ class TCP_PortScanning_2 {
                 }
             }
         } catch (Exception e) {
-            return "error" + e.getMessage();
+            return ">>> error" + e.getMessage();
         }
-        return "No Site Local Address Found";
+        return ">> No Site Local Address Found";
     }
 }
