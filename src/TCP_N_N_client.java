@@ -164,6 +164,7 @@ class TCP_PortScanning_2 {
     public static String getLocalIp() {
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+
             while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = networkInterfaces.nextElement();
 
@@ -177,7 +178,7 @@ class TCP_PortScanning_2 {
                     InetAddress inetAddress = inetAddresses.nextElement();
 
                     // 4. IPv4 주소이면서, 5. 사설 IP 대역인 경우
-                    if (inetAddress instanceof Inet4Address && inetAddress.isSiteLocalAddress()) {
+                    if (inetAddress.getHostAddress() != null) {
                         return inetAddress.getHostAddress();
                     }
                 }

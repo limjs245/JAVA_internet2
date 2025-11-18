@@ -35,7 +35,7 @@ public class IpUtils3 {
                     System.out.println("    isSiteLocalAddress: " + inetAddress.isSiteLocalAddress());
 
                     // 4. IPv4 주소이면서, 5. 사설 IP 대역인 경우
-                    if (inetAddress instanceof Inet4Address && inetAddress.isSiteLocalAddress()) {
+                    if (inetAddress.getHostAddress() != null) {
                         System.out.println("  -> 선택됨!");
                         return inetAddress.getHostAddress();
                     }
