@@ -161,14 +161,14 @@ class TCP_PortScanning_2 {
     }
 
     // ip 주소를 얻는 함수
+    // 기존 수업에서 배운 함수가 작동을 안 해서 AI 사용
     public static String getLocalIp() {
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
 
             while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = networkInterfaces.nextElement();
-
-                // 1. 루프백(127.0.0.1), 2. 가상, 3. 비활성화 인터페이스 제외
+                
                 if (networkInterface.isLoopback() || networkInterface.isVirtual() || !networkInterface.isUp()) {
                     continue;
                 }
@@ -176,8 +176,7 @@ class TCP_PortScanning_2 {
                 Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
                 while (inetAddresses.hasMoreElements()) {
                     InetAddress inetAddress = inetAddresses.nextElement();
-
-                    // 4. IPv4 주소이면서, 5. 사설 IP 대역인 경우
+                    
                     if (inetAddress.getHostAddress() != null) {
                         return inetAddress.getHostAddress();
                     }
