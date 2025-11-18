@@ -14,7 +14,7 @@ public class IpUtils {
                 // 1. 루프백(127.0.0.1), 2. 가상, 3. 비활성화 인터페이스 제외
                 String name = networkInterface.getName().toLowerCase();
                 if (networkInterface.isLoopback() || !networkInterface.isUp() ||
-                        (!name.startsWith("eth") && !name.startsWith("en") &&
+                        (!name.startsWith("eth4") && !name.startsWith("en") &&
                                 !name.startsWith("wlan") && !name.startsWith("wl"))) {
                     continue;
                 }
